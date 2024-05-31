@@ -103,13 +103,6 @@ class LimitOffsetGraphqlPagination(BaseDjangoGraphqlPagination):
         }
 
     def paginate_queryset(self, qs, **kwargs):
-        limit = _nonzero_int(
-            kwargs.get(self.limit_query_param, None), strict=True, cutoff=self.max_limit
-        )
-
-        if limit is None:
-            return qs
-
         order = kwargs.pop(self.ordering_param, None) or self.ordering
         if order:
             if "," in order:
@@ -118,6 +111,13 @@ class LimitOffsetGraphqlPagination(BaseDjangoGraphqlPagination):
                     qs = qs.order_by(*order)
             else:
                 qs = qs.order_by(order)
+                
+        limit = _nonzero_int(
+            kwargs.get(self.limit_query_param, None), strict=True, cutoff=self.max_limit
+        )
+
+        if limit is None:
+            return qs
 
         offset = kwargs.get(self.offset_query_param, 0)
         if offset is None:
